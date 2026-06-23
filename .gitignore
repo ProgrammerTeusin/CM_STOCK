@@ -1,5 +1,27 @@
-# Object file
-*.o
+# Ambiente Virtual (Venv)
+venv/
+.venv/
+env/
+ENV/
 
-# Ada Library Information
-*.ali
+# Arquivos de Configuração e Senhas (Segurança)
+.env
+
+# Cache do Python (Arquivos temporários compilados)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Banco de Dados Local (Caso gere algum arquivo de teste local)
+*.db
+*.sqlite3
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Pastas de IDEs (Editores de código)
+.vscode/
+.idea/
