@@ -77,9 +77,12 @@ DATABASE_URL=mssql+pyodbc:///?odbc_connect=DRIVER%3D%7BODBC+Driver+17+for+SQL+Se
 Para validar a conexao com o banco:
 
 ```bash
-python testar_conexao.py
+python principal.py
 ```
-
+E acesse a rota:
+```
+/teste-banco
+```
 Resultado esperado:
 
 ```bash
