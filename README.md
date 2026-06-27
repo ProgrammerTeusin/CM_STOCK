@@ -1,37 +1,133 @@
 # CM_STOCK
+Sistema web de controle de estoque por enderecamento de armazem, desenvolvido como teste tecnico para a vaga de Analista de Sistemas.
 
-Este projeto consiste em um sistema completo de **Controle de Estoque por Endereçamento de Armazém**, desenvolvido como solução para o teste técnico de avaliação para a vaga de **Analista de Sistemas**.
+O objetivo final do projeto e disponibilizar uma API REST em Flask, uma interface web simples e uma integracao com SQL Server para cadastro de produtos, enderecos de estoque e contagens.
 
----
+## Status atual
 
-### 2. Configurações Iniciais para Executar o Projeto com Eficiência
+Esta primeira etapa valida a base do projeto antes da implementacao das regras de negocio:
 
-#### 2.1 Criar e Ativar o Ambiente Virtual (venv)
-> **💡 Recomendação Técnica:** Para fins de isolamento e para evitar conflitos de dependências com outras bibliotecas globais do Python já instaladas no sistema operacional, recomenda-se fortemente a criação e o uso de um ambiente virtual (`venv`) exclusivo para este projeto.
+- estrutura inicial da aplicacao Flask;
+- configuracao por variaveis de ambiente;
+- conexao com SQL Server usando SQLAlchemy e PyODBC;
+- teste simples de conexao com o banco;
+- organizacao inicial para as proximas camadas da aplicacao.
 
-Execute o comando correspondente ao seu sistema operacional:
+## Tecnologias
+
+- Python 3.10+
+- Flask
+- SQLAlchemy
+- PyODBC
+- SQL Server
+- python-dotenv
+
+## Como executar
+
+### 1. Criar o ambiente virtual
+
+No Windows:
 
 ```bash
-# Criar o ambiente virtual (isolado do sistema global)
 python -m venv venv
-
-# Ativar no Windows (Prompt de Comando - CMD)
 venv\Scripts\activate
-
-# Ativar no Windows (PowerShell)
-.\venv\Scripts\Activate.ps1
-
-# Ativar no Linux / macOS
-source venv/bin/activate
 ```
 
-Ao ativar com sucesso, o terminal exibirá o prefixo `(venv)` antes do caminho da pasta, indicando que todas as instalações a partir deste ponto ficarão restritas a este projeto.
+No PowerShell:
 
-#### 2.2 Instalar as Bibliotecas Necessárias
-Foi disponibilizado o arquivo `requirements.txt`, que contém todas as dependências e suas respectivas versões fixadas de forma estrita, garantindo a reprodutibilidade exata da aplicação.
+```bash
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
 
-Com o ambiente virtual (`venv`) devidamente ativo, execute o comando abaixo no seu terminal para realizar a instalação automatizada:
+### 2. Instalar dependencias
+
+Com o ambiente virtual ativo:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+## Estrutura do projeto
+
+####  Framework e Validação Inicial (Proof of Concept)
+De início, foi desenvolvido um protótipo funcional minimalista (o tradicional "Olá, Mundo!" em formato JSON). O objetivo desta etapa foi validar o correto funcionamento do servidor Flask, garantir que a etapa Genesis (parte inicial) do aplicativo (`criar_app`) resolvesse as rotas sem importações circulares e certificar que o isolamento do ambiente virtual (`venv`) estivesse carregando todas as dependências do arquivo `requirements.txt` com sucesso.
+
+#### Resposta esperada
+{
+  "mensagem": "Olá, Mundo! Fundação do projeto CM_STOCK (ETAPA GENESIS) iniciada com sucesso.",
+  "projeto": "Controle de Estoque por Endereçamento",
+  "status": "sucesso",
+  "vaga": "Analista de Sistemas"
+}
+
+
+### 3. Configurar o banco de dados
+
+ Ajuste a variavel `DATABASE_URL` com a string de conexao do seu SQL Server dentro do arquivo .env.
+
+Exemplo:
+
+```env
+DATABASE_URL=mssql+pyodbc:///?odbc_connect=DRIVER%3D%7BODBC+Driver+17+for+SQL+Server%7D%3BSERVER%3DSEU_SERVIDOR%3BDATABASE%3DCM_STOCK%3BTrusted_Connection%3Dyes%3B
+```
+
+## Teste de conexao com SQL Server
+
+Para validar a conexao com o banco:
+
+```bash
+python testar_conexao.py
+```
+
+Resultado esperado:
+
+```bash
+Conexao com o SQL Server realizada com sucesso.
+Horario retornado pelo banco: ...
+```
+
+Esse teste executa uma consulta simples no SQL Server para confirmar que a aplicacao consegue carregar a variavel `DATABASE_URL`, abrir a conexao e receber resposta do banco.
+
+## Executar a API inicial
+
+Para iniciar a aplicacao Flask:
+
+```bash
+python principal.py
+```
+
+## Decisoes iniciais
+
+- A aplicacao usa o padrao de fabrica do Flask por meio da funcao `criar_app`.
+- A conexao com o banco foi isolada em `app/database/conexao.py`.
+- A string de conexao e carregada por variavel de ambiente para evitar dados sensiveis no codigo.
+- O primeiro marco do projeto foi validar a infraestrutura antes de iniciar os endpoints e telas.
+
+- `Controller`: recebe as requisicoes HTTP e retorna respostas JSON ou telas.
+- `Service`: concentra regras de negocio e validacoes.
+- `Repository`: concentra consultas e operacoes de persistencia no banco.
+- `Model`: representa as tabelas e relacionamentos do banco.
+- `database`: centraliza a conexao, sessao e base do SQLAlchemy.
+
+
+## Proximas etapas
+
+1. Padronizar nomes de pastas e arquivos em snake_case. Seguindo a forma:
+```text
+Controller -> Service -> Repository -> Model -> Banco de dados
+```
+
+2. Criar os models de `Produto`, `Endereco` e `Contagem`.
+3. Criar script para gerar as tabelas no banco.
+4. Implementar CRUD de produtos.
+5. Implementar CRUD de enderecos.
+6. Implementar registro de contagens.
+7. Implementar saldo por endereco e relatorio de divergencia.
+8. Criar telas web consumindo a API.
+
+## Observacoes
+
+Este projeto ainda esta em fase inicial. Funcionalidades como CRUD, relatorios, seed de dados e interface web serao implementadas nas proximas etapas.
+Esutura de pastas e o português estritamente para as regras do edital.
+  
