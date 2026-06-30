@@ -1,7 +1,6 @@
 from flask import Flask
 
-from app.database.conexao import testar_conexao_banco
-
+from seed import executar_seed
 
 def criar_app():
     app = Flask(__name__)
@@ -17,15 +16,19 @@ def criar_app():
      #  CORREÇÃO: Força o Flask a aceitar caracteres em português (UTF-8) no JSON
     app.json.ensure_ascii = False
 
-    @app.get("/teste-banco")
-    def testando_banco():
+    @app.route("/seed", methods=["GET","POST"])
+    def seed():
+        """Essa foi usada para Teste, se achar melhor execute diretamente o seed por meio de python seed.py"""
         try:
-            horario_banco = testar_conexao_banco()
-
-            return {
-                "mensagem": "Conexao com o SQL Server realizada com sucesso.",
-                "horario_banco": str(horario_banco)
-            }, 200
+           if executar_seed():
+                return {
+                    "mensagem": "Tabelas principais criada com Sucesso.",
+                    "Situação": "Dados inseridos com sucessos em seed"
+                }, 200
+           else:
+               return {
+                   "mensagem":"Dados não salvos"
+               },500
 
         except Exception as erro:
             return {

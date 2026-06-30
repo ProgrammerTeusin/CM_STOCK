@@ -3,16 +3,6 @@ Sistema web de controle de estoque por enderecamento de armazem, desenvolvido co
 
 O objetivo final do projeto e disponibilizar uma API REST em Flask, uma interface web simples e uma integracao com SQL Server para cadastro de produtos, enderecos de estoque e contagens.
 
-## Status atual
-
-Esta primeira etapa valida a base do projeto antes da implementacao das regras de negocio:
-
-- estrutura inicial da aplicacao Flask;
-- configuracao por variaveis de ambiente;
-- conexao com SQL Server usando SQLAlchemy e PyODBC;
-- teste simples de conexao com o banco;
-- organizacao inicial para as proximas camadas da aplicacao.
-
 ## Tecnologias
 
 - Python 3.10+
@@ -92,6 +82,8 @@ Horario retornado pelo banco: ...
 
 Esse teste executa uma consulta simples no SQL Server para confirmar que a aplicacao consegue carregar a variavel `DATABASE_URL`, abrir a conexao e receber resposta do banco.
 
+
+Ou se preferir pode excutar diretamente o arquivo seed.py
 ## Executar a API inicial
 
 Para iniciar a aplicacao Flask:
@@ -100,7 +92,7 @@ Para iniciar a aplicacao Flask:
 python principal.py
 ```
 
-## Decisoes iniciais
+## Decisoes inicial
 
 - A aplicacao usa o padrao de fabrica do Flask por meio da funcao `criar_app`.
 - A conexao com o banco foi isolada em `app/database/conexao.py`.
@@ -113,24 +105,26 @@ python principal.py
 - `Model`: representa as tabelas e relacionamentos do banco.
 - `database`: centraliza a conexao, sessao e base do SQLAlchemy.
 
+-
+
+## Status atual
+
+A infraestrutura de persistência e a modelagem do domínio foram concluídas com sucesso, estabelecendo os pilares fundamentais da aplicação:
+
+- **Geração Automatizada do Schema:** Desenvolvimento do script de criação automática das tabelas `produtos`, `enderecos` e `contagens` diretamente no Microsoft SQL Server via SQLAlchemy Puro.
+- **Lógica e Consistência de Lançamento:** A tabela de `contagens` foi estruturada com regras de integridade referencial, vinculando de forma direta o produto (via SKU) e a posição no armazem (via código de endereço).
+- **Auditoria Cronológica em UTC:** Implementação da captura nativa de data/hora padronizada em fuso horário UTC (formato ISO 8601), garantindo precisão absoluta para o rastreamento histórico e auditorias de inventário.
+- **Carga de Dados Inteligente (Seed):** Implementação do script `seed.py` com lógica condicional por perfil de embalagem (`PALETE`, `CX`, `UN`), gerando uma massa de testes realista para os relatórios analíticos.
+
+
 
 ## Proximas etapas
 
-1. Padronizar nomes de pastas e arquivos em snake_case. Seguindo a forma:
-```text
-Controller -> Service -> Repository -> Model -> Banco de dados
-```
 
-2. Criar os models de `Produto`, `Endereco` e `Contagem`.
-3. Criar script para gerar as tabelas no banco.
-4. Implementar CRUD de produtos.
-5. Implementar CRUD de enderecos.
-6. Implementar registro de contagens.
-7. Implementar saldo por endereco e relatorio de divergencia.
-8. Criar telas web consumindo a API.
+1. Implementar CRUD de produtos.
+2. Implementar CRUD de enderecos.
+4. Implementar registro de contagens.
+5. Implementar saldo por endereco e relatorio de divergencia.
+6. Criar telas web consumindo a API.
 
-## Observacoes
 
-Este projeto ainda esta em fase inicial. Funcionalidades como CRUD, relatorios, seed de dados e interface web serao implementadas nas proximas etapas.
-Esutura de pastas e o português estritamente para as regras do edital.
-  

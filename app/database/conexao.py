@@ -14,7 +14,3 @@ if not URL_BANCO:
 motor = create_engine(URL_BANCO)
 SessionLocal = sessionmaker(bind=motor)
 
-
-def testar_conexao_banco():
-    with motor.connect() as conexao:
-        return conexao.execute(text("SELECT GETDATE();")).scalar()

@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import pyodbc
 
 
 load_dotenv()
@@ -20,5 +21,4 @@ class Config:
         )
 
 if __name__ == "__main__":
-    import pyodbc
     print(pyodbc.drivers())
