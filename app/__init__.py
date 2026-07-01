@@ -1,39 +1,40 @@
-from flask import Flask
+from flask import Flask, request, render_template
 
-from seed import executar_seed
+from app.database.conexao import SessionLocal
+from app.Model.Produto import Produto
+from app.Repository.ProdutosRepositorio import Produto_Repositorio
 
 def criar_app():
     app = Flask(__name__)
-
-    @app.get("/")
-    def ola_mundo():
-        return {
-            "status": "sucesso",
-            "mensagem": "Olá, Mundo! Fundação do projeto CM_STOCK (ETAPA GENESIS) iniciada com sucesso.",
-            "projeto": "Controle de Estoque por Endereçamento",
-            "vaga": "Analista de Sistemas"
-        }
-     #  CORREÇÃO: Força o Flask a aceitar caracteres em português (UTF-8) no JSON
     app.json.ensure_ascii = False
 
-    @app.route("/seed", methods=["GET","POST"])
-    def seed():
-        """Essa foi usada para Teste, se achar melhor execute diretamente o seed por meio de python seed.py"""
-        try:
-           if executar_seed():
-                return {
-                    "mensagem": "Tabelas principais criada com Sucesso.",
-                    "Situação": "Dados inseridos com sucessos em seed"
-                }, 200
-           else:
-               return {
-                   "mensagem":"Dados não salvos"
-               },500
+    @app.route("/")
+    def principal():
+        return render_template("index.html")
 
-        except Exception as erro:
+    @app.route("/salvar", methods=["POST"])
+    def salvar():
+
+        dados = request.get_json()
+
+        sessao = SessionLocal()
+
+        try:
+            repositorio = Produto_Repositorio(sessao)
+
+            produto = Produto(
+                sku=dados["sku"],
+                descricao=dados["descricao"],
+                unidade=dados["unidade"]
+            )
+
+            repositorio.salvar(produto)
+
             return {
-                "mensagem": "Falha ao conectar com o SQL Server.",
-                "erro": str(erro)
-            }, 500
+                "mensagem": "Produto salvo com sucesso"
+            }, 201
+
+        finally:
+            sessao.close()
 
     return app

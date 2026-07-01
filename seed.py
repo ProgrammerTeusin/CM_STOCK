@@ -12,8 +12,6 @@ def executar_seed():
     sessao = SessionLocal()
 
     try:
-        sessao.commit()
-
         produtos = [
             Produto(sku="SKU001", descricao="PEPSI ZERO PET 2L CAIXA C/6", unidade="CX"),
             Produto(sku="SKU002", descricao="PEPSI COLA PET 2L", unidade="UN"),

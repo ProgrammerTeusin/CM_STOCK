@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Produto</title>
+</head>
+<body>
+
+    <h1>Cadastrar Produto</h1>
+
+    <input type="text" id="sku" placeholder="SKU"><br><br>
+    <input type="text" id="descricao" placeholder="Descrição"><br><br>
+    <input type="text" id="unidade" placeholder="Unidade"><br><br>
+
+    <button onclick="salvarProduto()">Salvar</button>
+
+    <script>
+        async function salvarProduto() {
+
+            const produto = {
+                sku: document.getElementById("sku").value,
+                descricao: document.getElementById("descricao").value,
+                unidade: document.getElementById("unidade").value
+            };
+
+            const resposta = await fetch("/salvar", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(produto)
+            });
+
+            const dados = await resposta.json();
+
+            alert(dados.mensagem);
+        }
+    </script>
+
+</body>
+</html>
