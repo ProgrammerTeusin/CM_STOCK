@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Produtos</title>
+</head>
+<body>
+
+    <p><a href="/">&larr; Início</a></p>
+
+    <h1>Produtos</h1>
+
+    <p><a href="/produtos/novo">+ Novo produto</a></p>
+
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Descrição</th>
+                <th>Unidade</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="tabela-produtos"></tbody>
+    </table>
+
+    <p id="mensagem"></p>
+
+    <script>
+        async function carregarProdutos() {
+            const resposta = await fetch("/api/produtos?tamanho_pagina=100");
+            const dados = await resposta.json();
+
+            const corpo = document.getElementById("tabela-produtos");
+            corpo.innerHTML = "";
+
+            dados.itens.forEach(produto => {
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td>${produto.sku}</td>
+                    <td>${produto.descricao}</td>
+                    <td>${produto.unidade}</td>
+                    <td>
+                        <a href="/produtos/${produto.sku}/editar">Editar</a>
+                        &nbsp;|&nbsp;
+                        <a href="#" onclick="removerProduto('${produto.sku}'); return false;">Remover</a>
+                    </td>
+                `;
+                corpo.appendChild(linha);
+            });
+        }
+
+        async function removerProduto(sku) {
+            if (!confirm(`Remover o produto ${sku}?`)) return;
+
+            const resposta = await fetch(`/api/produtos/${sku}`, { method: "DELETE" });
+
+            if (resposta.ok) {
+                carregarProdutos();
+            } else {
+                const dados = await resposta.json();
+                document.getElementById("mensagem").innerText = dados.erro || "Erro ao remover produto";
+            }
+        }
+
+        carregarProdutos();
+    </script>
+
+</body>
+</html>

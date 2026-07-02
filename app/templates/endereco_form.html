@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ "Editar" if codigo else "Cadastrar" }} Endereço</title>
+</head>
+<body>
+
+    <p><a href="/enderecos">&larr; Endereços</a></p>
+
+    <h1>{{ "Editar" if codigo else "Cadastrar" }} Endereço</h1>
+
+    <input type="text" id="endereco" placeholder="Código (ex.: R01-P03-N02-A05)" {{ "readonly" if codigo else "" }}><br><br>
+    <input type="text" id="descricao" placeholder="Descrição (opcional)"><br><br>
+
+    <button onclick="salvarEndereco()">Salvar</button>
+
+    <p id="mensagem"></p>
+
+    <script>
+        const codigoOriginal = {{ codigo | tojson }};
+
+        async function carregarEnderecoExistente() {
+            if (!codigoOriginal) return;
+
+            const resposta = await fetch(`/api/enderecos/${codigoOriginal}`);
+            const endereco = await resposta.json();
+
+            document.getElementById("endereco").value = endereco.endereco;
+            document.getElementById("descricao").value = endereco.descricao;
+        }
+
+        async function salvarEndereco() {
+            const endereco = {
+                endereco: document.getElementById("endereco").value,
+                descricao: document.getElementById("descricao").value
+            };
+
+            const url = codigoOriginal ? `/api/enderecos/${codigoOriginal}` : "/api/enderecos";
+            const metodo = codigoOriginal ? "PUT" : "POST";
+
+            const resposta = await fetch(url, {
+                method: metodo,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(endereco)
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                window.location.href = "/enderecos";
+            } else {
+                document.getElementById("mensagem").innerText = dados.erro || "Erro ao salvar endereço";
+            }
+        }
+
+        carregarEnderecoExistente();
+    </script>
+
+</body>
+</html>

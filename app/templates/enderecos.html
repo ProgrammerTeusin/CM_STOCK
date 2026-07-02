@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Endereços</title>
+</head>
+<body>
+
+    <p><a href="/">&larr; Início</a></p>
+
+    <h1>Endereços</h1>
+
+    <p><a href="/enderecos/novo">+ Novo endereço</a></p>
+
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="tabela-enderecos"></tbody>
+    </table>
+
+    <p id="mensagem"></p>
+
+    <script>
+        async function carregarEnderecos() {
+            const resposta = await fetch("/api/enderecos?tamanho_pagina=100");
+            const dados = await resposta.json();
+
+            const corpo = document.getElementById("tabela-enderecos");
+            corpo.innerHTML = "";
+
+            dados.itens.forEach(endereco => {
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td>${endereco.endereco}</td>
+                    <td>${endereco.descricao}</td>
+                    <td>
+                        <a href="/enderecos/${endereco.endereco}/editar">Editar</a>
+                        &nbsp;|&nbsp;
+                        <a href="#" onclick="removerEndereco('${endereco.endereco}'); return false;">Remover</a>
+                    </td>
+                `;
+                corpo.appendChild(linha);
+            });
+        }
+
+        async function removerEndereco(codigo) {
+            if (!confirm(`Remover o endereço ${codigo}?`)) return;
+
+            const resposta = await fetch(`/api/enderecos/${codigo}`, { method: "DELETE" });
+
+            if (resposta.ok) {
+                carregarEnderecos();
+            } else {
+                const dados = await resposta.json();
+                document.getElementById("mensagem").innerText = dados.erro || "Erro ao remover endereço";
+            }
+        }
+
+        carregarEnderecos();
+    </script>
+
+</body>
+</html>

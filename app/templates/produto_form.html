@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ "Editar" if sku else "Cadastrar" }} Produto</title>
+</head>
+<body>
+
+    <p><a href="/produtos">&larr; Produtos</a></p>
+
+    <h1>{{ "Editar" if sku else "Cadastrar" }} Produto</h1>
+
+    <input type="text" id="sku" placeholder="SKU" {{ "readonly" if sku else "" }}><br><br>
+    <input type="text" id="descricao" placeholder="Descrição"><br><br>
+    <input type="text" id="unidade" placeholder="Unidade (UN, CX, PALETE)"><br><br>
+
+    <button onclick="salvarProduto()">Salvar</button>
+
+    <p id="mensagem"></p>
+
+    <script>
+        const skuOriginal = {{ sku | tojson }};
+
+        async function carregarProdutoExistente() {
+            if (!skuOriginal) return;
+
+            const resposta = await fetch(`/api/produtos/${skuOriginal}`);
+            const produto = await resposta.json();
+
+            document.getElementById("sku").value = produto.sku;
+            document.getElementById("descricao").value = produto.descricao;
+            document.getElementById("unidade").value = produto.unidade;
+        }
+
+        async function salvarProduto() {
+            const produto = {
+                sku: document.getElementById("sku").value,
+                descricao: document.getElementById("descricao").value,
+                unidade: document.getElementById("unidade").value
+            };
+
+            const url = skuOriginal ? `/api/produtos/${skuOriginal}` : "/api/produtos";
+            const metodo = skuOriginal ? "PUT" : "POST";
+
+            const resposta = await fetch(url, {
+                method: metodo,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(produto)
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                window.location.href = "/produtos";
+            } else {
+                document.getElementById("mensagem").innerText = dados.erro || "Erro ao salvar produto";
+            }
+        }
+
+        carregarProdutoExistente();
+    </script>
+
+</body>
+</html>

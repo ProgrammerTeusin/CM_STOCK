@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Divergência</title>
+    <style>
+        .aumento { background-color: #d4f7d4; }
+        .reducao { background-color: #f7d4d4; }
+        .estavel { background-color: #f0f0f0; }
+        .sem_historico { background-color: #ffffff; color: #888; }
+    </style>
+</head>
+<body>
+
+    <p><a href="/">&larr; Início</a></p>
+
+    <h1>Relatório de Divergência</h1>
+
+    <label>Endereço:</label>
+    <select id="endereco"></select>
+    <button onclick="consultarDivergencia()">Consultar</button>
+
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Descrição</th>
+                <th>Qtd. anterior</th>
+                <th>Qtd. atual</th>
+                <th>Diferença</th>
+                <th>Situação</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-divergencia"></tbody>
+    </table>
+
+    <p id="mensagem"></p>
+
+    <script>
+        const rotulos = {
+            aumento: "Aumento",
+            reducao: "Redução",
+            estavel: "Estável",
+            sem_historico: "Sem histórico"
+        };
+
+        async function carregarEnderecos() {
+            const resposta = await fetch("/api/enderecos?tamanho_pagina=100");
+            const dados = await resposta.json();
+
+            const select = document.getElementById("endereco");
+            dados.itens.forEach(endereco => {
+                const opcao = document.createElement("option");
+                opcao.value = endereco.endereco;
+                opcao.textContent = endereco.endereco;
+                select.appendChild(opcao);
+            });
+
+            if (dados.itens.length > 0) {
+                consultarDivergencia();
+            }
+        }
+
+        async function consultarDivergencia() {
+            const endereco = document.getElementById("endereco").value;
+            if (!endereco) return;
+
+            const resposta = await fetch(`/api/relatorios/divergencia/${endereco}`);
+            const dados = await resposta.json();
+
+            const corpo = document.getElementById("tabela-divergencia");
+            corpo.innerHTML = "";
+
+            if (!resposta.ok) {
+                document.getElementById("mensagem").innerText = dados.erro || "Erro ao consultar divergência";
+                return;
+            }
+
+            document.getElementById("mensagem").innerText = "";
+
+            dados.forEach(item => {
+                const linha = document.createElement("tr");
+                linha.className = item.situacao;
+                linha.innerHTML = `
+                    <td>${item.sku}</td>
+                    <td>${item.descricao}</td>
+                    <td>${item.quantidade_anterior ?? "-"}</td>
+                    <td>${item.quantidade_atual}</td>
+                    <td>${item.diferenca ?? "-"}</td>
+                    <td>${rotulos[item.situacao]}</td>
+                `;
+                corpo.appendChild(linha);
+            });
+        }
+
+        carregarEnderecos();
+    </script>
+
+</body>
+</html>

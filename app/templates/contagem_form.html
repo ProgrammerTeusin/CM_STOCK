@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Contagem</title>
+</head>
+<body>
+
+    <p><a href="/">&larr; Início</a></p>
+
+    <h1>Registrar Contagem</h1>
+
+    <label>Produto (SKU):</label><br>
+    <select id="sku"></select><br><br>
+
+    <label>Endereço:</label><br>
+    <select id="endereco"></select><br><br>
+
+    <input type="number" id="quantidade" placeholder="Quantidade" min="0"><br><br>
+    <input type="text" id="usuario" placeholder="Usuário"><br><br>
+
+    <button onclick="registrarContagem()">Registrar</button>
+
+    <p id="mensagem"></p>
+
+    <script>
+        async function carregarOpcoes() {
+            const [respostaProdutos, respostaEnderecos] = await Promise.all([
+                fetch("/api/produtos?tamanho_pagina=100"),
+                fetch("/api/enderecos?tamanho_pagina=100")
+            ]);
+
+            const produtos = (await respostaProdutos.json()).itens;
+            const enderecos = (await respostaEnderecos.json()).itens;
+
+            const selectSku = document.getElementById("sku");
+            produtos.forEach(produto => {
+                const opcao = document.createElement("option");
+                opcao.value = produto.sku;
+                opcao.textContent = `${produto.sku} — ${produto.descricao}`;
+                selectSku.appendChild(opcao);
+            });
+
+            const selectEndereco = document.getElementById("endereco");
+            enderecos.forEach(endereco => {
+                const opcao = document.createElement("option");
+                opcao.value = endereco.endereco;
+                opcao.textContent = endereco.endereco;
+                selectEndereco.appendChild(opcao);
+            });
+        }
+
+        async function registrarContagem() {
+            const contagem = {
+                sku: document.getElementById("sku").value,
+                endereco: document.getElementById("endereco").value,
+                quantidade: document.getElementById("quantidade").value,
+                usuario: document.getElementById("usuario").value
+            };
+
+            const resposta = await fetch("/api/contagens", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(contagem)
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                document.getElementById("mensagem").innerText = "Contagem registrada com sucesso!";
+                document.getElementById("quantidade").value = "";
+                document.getElementById("usuario").value = "";
+            } else {
+                document.getElementById("mensagem").innerText = dados.erro || "Erro ao registrar contagem";
+            }
+        }
+
+        carregarOpcoes();
+    </script>
+
+</body>
+</html>

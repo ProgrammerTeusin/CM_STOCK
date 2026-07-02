@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Saldo por Endereço</title>
+</head>
+<body>
+
+    <p><a href="/">&larr; Início</a></p>
+
+    <h1>Saldo por Endereço</h1>
+
+    <label>Endereço:</label>
+    <select id="endereco"></select>
+    <button onclick="consultarSaldo()">Consultar</button>
+
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Descrição</th>
+                <th>Unidade</th>
+                <th>Quantidade atual</th>
+                <th>Última contagem</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-saldo"></tbody>
+    </table>
+
+    <p id="mensagem"></p>
+
+    <script>
+        async function carregarEnderecos() {
+            const resposta = await fetch("/api/enderecos?tamanho_pagina=100");
+            const dados = await resposta.json();
+
+            const select = document.getElementById("endereco");
+            dados.itens.forEach(endereco => {
+                const opcao = document.createElement("option");
+                opcao.value = endereco.endereco;
+                opcao.textContent = endereco.endereco;
+                select.appendChild(opcao);
+            });
+
+            if (dados.itens.length > 0) {
+                consultarSaldo();
+            }
+        }
+
+        async function consultarSaldo() {
+            const endereco = document.getElementById("endereco").value;
+            if (!endereco) return;
+
+            const resposta = await fetch(`/api/relatorios/saldo/${endereco}`);
+            const dados = await resposta.json();
+
+            const corpo = document.getElementById("tabela-saldo");
+            corpo.innerHTML = "";
+
+            if (!resposta.ok) {
+                document.getElementById("mensagem").innerText = dados.erro || "Erro ao consultar saldo";
+                return;
+            }
+
+            document.getElementById("mensagem").innerText = "";
+
+            dados.forEach(item => {
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td>${item.sku}</td>
+                    <td>${item.descricao}</td>
+                    <td>${item.unidade}</td>
+                    <td>${item.quantidade_atual}</td>
+                    <td>${new Date(item.ultima_contagem_em).toLocaleString("pt-BR")}</td>
+                `;
+                corpo.appendChild(linha);
+            });
+        }
+
+        carregarEnderecos();
+    </script>
+
+</body>
+</html>

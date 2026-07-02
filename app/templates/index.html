@@ -2,40 +2,19 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Cadastro de Produto</title>
+    <title>CM_STOCK</title>
 </head>
 <body>
 
-    <h1>Cadastrar Produto</h1>
+    <h1>CM_STOCK — Controle de Estoque por Endereço</h1>
 
-    <input type="text" id="sku" placeholder="SKU"><br><br>
-    <input type="text" id="descricao" placeholder="Descrição"><br><br>
-    <input type="text" id="unidade" placeholder="Unidade"><br><br>
-
-    <button onclick="salvarProduto()">Salvar</button>
-
-    <script>
-        async function salvarProduto() {
-
-            const produto = {
-                sku: document.getElementById("sku").value,
-                descricao: document.getElementById("descricao").value,
-                unidade: document.getElementById("unidade").value
-            };
-
-            const resposta = await fetch("/salvar", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(produto)
-            });
-
-            const dados = await resposta.json();
-
-            alert(dados.mensagem);
-        }
-    </script>
+    <ul>
+        <li><a href="/produtos">Produtos</a></li>
+        <li><a href="/enderecos">Endereços</a></li>
+        <li><a href="/contagens/nova">Registrar contagem</a></li>
+        <li><a href="/relatorios/saldo">Saldo por endereço</a></li>
+        <li><a href="/relatorios/divergencia">Relatório de divergência</a></li>
+    </ul>
 
 </body>
 </html>
