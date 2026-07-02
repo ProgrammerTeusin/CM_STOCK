@@ -117,6 +117,8 @@ A infraestrutura de persistência e a modelagem do domínio foram concluídas co
 - **Carga de Dados Inteligente (Seed):** Implementação do script `seed.py` com lógica condicional por perfil de embalagem (`PALETE`, `CX`, `UN`), gerando uma massa de testes realista para os relatórios analíticos.
 
 
+- `erros.py`: exceções de negócio (validação, não encontrado, conflito) usadas pelo tratamento de erros centralizado da API.
+
 
 ## Proximas etapas
 
