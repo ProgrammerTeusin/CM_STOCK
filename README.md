@@ -120,6 +120,8 @@ A infraestrutura de persistência e a modelagem do domínio foram concluídas co
 
 - `erros.py`: exceções de negócio (validação, não encontrado, conflito) usadas pelo tratamento de erros centralizado da API.
 
+- `Service`: agora implementado — concentra validação de campos obrigatórios, unicidade de SKU/endereço e cálculo do relatório de divergência.
+
 
 
 
