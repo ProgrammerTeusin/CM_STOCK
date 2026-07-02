@@ -54,9 +54,13 @@ De início, foi desenvolvido um protótipo funcional minimalista (o tradicional 
 
 ### 3. Configurar o banco de dados
 
- Ajuste a variavel `DATABASE_URL` com a string de conexao do seu SQL Server dentro do arquivo .env.
+Copie o arquivo `.env.example` para `.env` e ajuste a variavel `DATABASE_URL` com a string de conexao do seu SQL Server.
 
-Exemplo:
+```bash
+cp .env.example .env
+```
+
+Exemplo de conteudo do `.env`:
 
 ```env
 DATABASE_URL=mssql+pyodbc:///?odbc_connect=DRIVER%3D%7BODBC+Driver+17+for+SQL+Server%7D%3BSERVER%3DSEU_SERVIDOR%3BDATABASE%3DCM_STOCK%3BTrusted_Connection%3Dyes%3B
@@ -109,29 +113,48 @@ python principal.py
 
 ## Status atual
 
-A infraestrutura de persistência e a modelagem do domínio foram concluídas com sucesso, estabelecendo os pilares fundamentais da aplicação:
+A aplicação está funcional de ponta a ponta: API REST completa, telas web consumindo a API e persistência em SQL Server.
 
-- **Geração Automatizada do Schema:** Desenvolvimento do script de criação automática das tabelas `produtos`, `enderecos` e `contagens` diretamente no Microsoft SQL Server via SQLAlchemy Puro.
-- **Lógica e Consistência de Lançamento:** A tabela de `contagens` foi estruturada com regras de integridade referencial, vinculando de forma direta o produto (via SKU) e a posição no armazem (via código de endereço).
-- **Auditoria Cronológica em UTC:** Implementação da captura nativa de data/hora padronizada em fuso horário UTC (formato ISO 8601), garantindo precisão absoluta para o rastreamento histórico e auditorias de inventário.
-- **Persistência por camada:** repositórios dedicados para Produto, Endereço e Contagem, isolando toda consulta SQL/ORM do restante da aplicação.
-- **Consulta SQL puro:** o saldo por endereço e o relatório de divergência usam `ROW_NUMBER() OVER (PARTITION BY produto_id ORDER BY data_hora DESC)` em SQL puro (via `sqlalchemy.text`), comentado em `app/Repository/ContagensRepositorio.py`, para ranquear as últimas contagens de cada produto numa única ida ao banco.
-
+- **Geração Automatizada do Schema:** script de criação automática das tabelas `produtos`, `enderecos` e `contagens` via SQLAlchemy Puro (`app/Repository/criar_tabelas.py`, executado também pelo `seed.py`).
+- **Camadas:** `Controller` (Blueprints Flask, em `app/Controller`) → `Service` (regras de negócio e validações, em `app/Service`) → `Repository` (acesso a dados, em `app/Repository`) → `Model` (SQLAlchemy, em `app/Model`).
+- **Tratamento de erros centralizado:** exceções de negócio (`app/erros.py`) são convertidas em respostas JSON padronizadas com o status HTTP correto (400/404/409/422), registrado em `app/__init__.py`.
 
 - `erros.py`: exceções de negócio (validação, não encontrado, conflito) usadas pelo tratamento de erros centralizado da API.
 
-- `Service`: agora implementado — concentra validação de campos obrigatórios, unicidade de SKU/endereço e cálculo do relatório de divergência.
+- `Service`:  concentra validação de campos obrigatórios, unicidade de SKU/endereço e cálculo do relatório de divergência.
 
+- **Auditoria Cronológica em UTC:** captura nativa de data/hora em UTC (ISO 8601) em cada contagem.
+- **Carga de Dados (Seed):** `seed.py` popula 10 produtos, 5 endereços e 30 contagens distribuídas no tempo.
 
+### Endpoints da API
 
+| Recurso | Rota | Método |
+|---|---|---|
+| Produtos | `/api/produtos` | GET (paginado), POST |
+| Produtos | `/api/produtos/<sku>` | GET, PUT, DELETE |
+| Endereços | `/api/enderecos` | GET (paginado), POST |
+| Endereços | `/api/enderecos/<codigo>` | GET, PUT, DELETE |
+| Contagens | `/api/contagens` | POST (registrar) |
+| Contagens | `/api/contagens/produto/<sku>` | GET (histórico, filtros `data_inicio`/`data_fim`) |
+| Relatórios | `/api/relatorios/saldo/<endereco>` | GET |
+| Relatórios | `/api/relatorios/divergencia/<endereco>` | GET |
 
-## Proximas etapas
+A consulta de saldo e a de divergência usam **SQL puro** (via `sqlalchemy.text`, comentado em `app/Repository/ContagensRepositorio.py`), com `ROW_NUMBER() OVER (PARTITION BY ...)` para obter a(s) última(s) contagem(ns) de cada produto em um endereço numa única ida ao banco.
 
+### Telas web
 
-1. Implementar CRUD de produtos.
-2. Implementar CRUD de enderecos.
-4. Implementar registro de contagens.
-5. Implementar saldo por endereco e relatorio de divergencia.
-6. Criar telas web consumindo a API.
+`/`, `/produtos`, `/produtos/novo`, `/produtos/<sku>/editar`, `/enderecos`, `/enderecos/novo`, `/enderecos/<codigo>/editar`, `/contagens/nova`, `/relatorios/saldo`, `/relatorios/divergencia`.
 
+## Decisões de arquitetura e trade-offs
 
+- Optei por SQLAlchemy "puro" (Core/ORM sem Flask-SQLAlchemy) para ter controle explícito da sessão e poder intercalar SQL puro nas consultas de relatório sem depender de recursos específicos de uma extensão.
+- A camada `Service` concentra validação e regra de negócio (SKU/endereço únicos, quantidade não-negativa, cálculo de divergência); o `Controller` fica fino, só traduzindo request/response.
+- O cálculo de aumento/redução/estável do relatório de divergência fica em Python (não em SQL) porque é regra de negócio simples sobre poucos registros por endereço; a parte pesada (ranquear as contagens por data) fica no banco via `ROW_NUMBER()`.
+- Sessão por requisição (`SessionLocal()` aberta e fechada em cada rota) para simplicidade — em uma aplicação maior, valeria um middleware/`teardown_appcontext` para isso.
+
+## O que faria diferente com mais tempo
+
+- Testes automatizados dos Services e das consultas SQL de relatório.
+- Autenticação simples protegendo os endpoints de escrita.
+- Importação de contagens via CSV.
+- Índices explícitos em `contagens (endereco_id, produto_id, data_hora)`, com justificativa.
