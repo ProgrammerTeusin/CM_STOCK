@@ -114,10 +114,13 @@ A infraestrutura de persistência e a modelagem do domínio foram concluídas co
 - **Geração Automatizada do Schema:** Desenvolvimento do script de criação automática das tabelas `produtos`, `enderecos` e `contagens` diretamente no Microsoft SQL Server via SQLAlchemy Puro.
 - **Lógica e Consistência de Lançamento:** A tabela de `contagens` foi estruturada com regras de integridade referencial, vinculando de forma direta o produto (via SKU) e a posição no armazem (via código de endereço).
 - **Auditoria Cronológica em UTC:** Implementação da captura nativa de data/hora padronizada em fuso horário UTC (formato ISO 8601), garantindo precisão absoluta para o rastreamento histórico e auditorias de inventário.
-- **Carga de Dados Inteligente (Seed):** Implementação do script `seed.py` com lógica condicional por perfil de embalagem (`PALETE`, `CX`, `UN`), gerando uma massa de testes realista para os relatórios analíticos.
+- **Persistência por camada:** repositórios dedicados para Produto, Endereço e Contagem, isolando toda consulta SQL/ORM do restante da aplicação.
+- **Consulta SQL puro:** o saldo por endereço e o relatório de divergência usam `ROW_NUMBER() OVER (PARTITION BY produto_id ORDER BY data_hora DESC)` em SQL puro (via `sqlalchemy.text`), comentado em `app/Repository/ContagensRepositorio.py`, para ranquear as últimas contagens de cada produto numa única ida ao banco.
 
 
 - `erros.py`: exceções de negócio (validação, não encontrado, conflito) usadas pelo tratamento de erros centralizado da API.
+
+
 
 
 ## Proximas etapas
