@@ -34,10 +34,11 @@ class Relatorio_Service():
     def divergencia_por_endereco(self, codigo_endereco):
         endereco = self._buscar_endereco_ou_erro(codigo_endereco)
         linhas = self.repositorio.duas_ultimas_contagens_por_endereco(endereco.id)
-
+        print(linhas)
         agrupado = {}
         for linha in linhas:
             agrupado.setdefault(linha["produto_id"], []).append(linha)
+            
 
         relatorio = []
         for produto_id, contagens in agrupado.items():

@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 
 from app.database.conexao import SessionLocal
 from app.Service.ProdutoService import Produto_Service
-from app import config
+from app.database import conexao
 
 produtos_bp = Blueprint("produtos", __name__, url_prefix="/api/produtos")
 
@@ -13,8 +13,8 @@ def listar():
     try:
         pagina = int(request.args.get("pagina", 1))
         tamanho_pagina = min(
-            int(request.args.get("tamanho_pagina", config.PAGINACAO_TAMANHO_PADRAO)),
-            config.PAGINACAO_TAMANHO_MAXIMO
+            int(request.args.get("tamanho_pagina", conexao.PAGINACAO_TAMANHO_PADRAO)),
+            conexao.PAGINACAO_TAMANHO_MAXIMO
         )
 
         servico = Produto_Service(sessao)

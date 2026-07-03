@@ -23,6 +23,7 @@ def divergencia(codigo_endereco):
     try:
         servico = Relatorio_Service(sessao)
         resultado = servico.divergencia_por_endereco(codigo_endereco)
+        
         return jsonify(resultado)
     finally:
         sessao.close()

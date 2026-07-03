@@ -1,20 +1,20 @@
 from flask import Blueprint, request, jsonify
 
-from app.database.conexao import SessionLocal
+from app.database import conexao
 from app.Service.EnderecoService import Endereco_Service
-from app import config
+
 
 enderecos_bp = Blueprint("enderecos", __name__, url_prefix="/api/enderecos")
 
 
 @enderecos_bp.route("", methods=["GET"])
 def listar():
-    sessao = SessionLocal()
+    sessao = conexao.SessionLocal()
     try:
         pagina = int(request.args.get("pagina", 1))
         tamanho_pagina = min(
-            int(request.args.get("tamanho_pagina", config.PAGINACAO_TAMANHO_PADRAO)),
-            config.PAGINACAO_TAMANHO_MAXIMO
+            int(request.args.get("tamanho_pagina", conexao.PAGINACAO_TAMANHO_PADRAO)),
+            conexao.PAGINACAO_TAMANHO_MAXIMO
         )
 
         servico = Endereco_Service(sessao)
